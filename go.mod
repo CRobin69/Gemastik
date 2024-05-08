@@ -1,4 +1,4 @@
-module github.com/CRobin69/Gemastik
+module github.com/CRobinDev/Gemastik
 
 go 1.22.0
 
