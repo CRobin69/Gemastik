@@ -4,7 +4,7 @@ type ServiceResponse struct {
 	Code    int
 	Error   bool
 	Message string
-	Data    interface{}
+	Data    any
 }
 
 type Response struct {
