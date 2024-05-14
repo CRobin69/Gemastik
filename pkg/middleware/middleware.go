@@ -5,16 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Interface interface {
+type IMiddleware interface {
 	AuthenticateUser(ctx *gin.Context)
 }
 
-type middleware struct {
+type Middleware struct {
 	service *service.Service
 }
 
-func Init(service *service.Service) Interface {
-	return &middleware{
+func Init(service *service.Service) IMiddleware {
+	return &Middleware{
 		service: service,
 	}
 }

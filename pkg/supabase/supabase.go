@@ -17,7 +17,7 @@ func NewSupabaseStorage() *SupabaseStorage {
 		os.Getenv("SUPABASE_TOKEN"),
 		os.Getenv("SUPABASE_BUCKET"),
 	)
-	
+
 	return &SupabaseStorage{
 		Client: supClient,
 	}

@@ -1,22 +1,23 @@
 package middleware
 
 import (
-	"errors"
+	
 	"net/http"
 	"strings"
-	"github.com/CRobinDev/Gemastik/pkg/helper"
+	"github.com/CRobinDev/Gemastik/pkg/errors"
 	"github.com/CRobinDev/Gemastik/model"
+	"github.com/CRobinDev/Gemastik/pkg/helper"
 	"github.com/CRobinDev/Gemastik/pkg/response"
 	"github.com/gin-gonic/gin"
 )
 
-func (m *middleware) AuthenticateUser(ctx *gin.Context) {
+func (m *Middleware) AuthenticateUser(ctx *gin.Context) {
 	bearer := ctx.GetHeader("Authorization")
 	if bearer == "" {
 		response.Error(ctx, model.ServiceResponse{
 			Code:    http.StatusUnauthorized,
 			Error:   true,
-			Message: errors.New("unauthorized").Error(),
+			Message: errors.ErrUnathorized.Error(),
 		})
 		ctx.Abort()
 	}
@@ -27,7 +28,7 @@ func (m *middleware) AuthenticateUser(ctx *gin.Context) {
 		response.Error(ctx, model.ServiceResponse{
 			Code:    http.StatusUnauthorized,
 			Error:   true,
-			Message: errors.New("unauthorized").Error(),
+			Message: errors.ErrUnathorized.Error(),
 		})
 		ctx.Abort()
 		return
@@ -41,7 +42,7 @@ func (m *middleware) AuthenticateUser(ctx *gin.Context) {
 		response.Error(ctx, model.ServiceResponse{
 			Code:    http.StatusUnauthorized,
 			Error:   true,
-			Message: errors.New("unauthorized").Error(),
+			Message: errors.ErrUnathorized.Error(),
 		})
 		ctx.Abort()
 	}

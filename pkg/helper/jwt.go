@@ -1,14 +1,15 @@
 package helper
 
 import (
-	"errors"
+	err "errors"
 	"log"
 	"os"
 	"strconv"
 
 	"time"
 
-	"github.com/CRobinDev/Gemastik/entity"
+	"github.com/CRobinDev/Gemastik/model"
+	"github.com/CRobinDev/Gemastik/pkg/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -19,7 +20,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func CreateJWTToken(userID uuid.UUID) (string, error) {
+func SignJWTToken(userID uuid.UUID) (string, error) {
 	expiredTime, err := strconv.Atoi(os.Getenv("JWT_EXP_TIME"))
 	if err != nil {
 		log.Fatalf("failed set expired time for jwt : %v", err.Error())
@@ -38,7 +39,7 @@ func CreateJWTToken(userID uuid.UUID) (string, error) {
 	tokenString, err := token.SignedString([]byte(JWTSecretKey))
 
 	if err != nil {
-		return tokenString, err
+		return "", errors.ErrSigningJWT
 	}
 
 	return tokenString, nil
@@ -56,7 +57,7 @@ func ValidateToken(tokenString string) (uuid.UUID, error) {
 	})
 
 	if err != nil {
-		return userID, err
+		return userID, errors.ErrClaimsJWT
 	}
 
 	if !token.Valid {
@@ -68,11 +69,15 @@ func ValidateToken(tokenString string) (uuid.UUID, error) {
 	return userID, nil
 }
 
-func GetLoginUser(ctx *gin.Context) (entity.User, error) {
+func GetLoginUser(ctx *gin.Context) (model.ServiceResponse, error) {
 	user, ok := ctx.Get("user")
 	if !ok {
-		return entity.User{}, errors.New("failed to get user")
+		return model.ServiceResponse{}, err.New("failed to get user")
 	}
 
-	return user.(entity.User), nil
+	if u, ok := user.(model.ServiceResponse); ok {
+		return u, nil
+	} else {
+		return model.ServiceResponse{}, err.New("user is not of type entity.User")
+	}
 }

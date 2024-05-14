@@ -40,8 +40,10 @@ func Migrate(db *gorm.DB) error {
 	db = db.Debug()
 	if err := db.AutoMigrate(
 		&entity.User{},
+		&entity.Chat{},
+		&entity.Leaderboard{},
 	); err != nil {
-		return err
+		return errors.ErrMigrateDatabase
 	}
 	return nil
 }

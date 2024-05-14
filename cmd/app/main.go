@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load()
 	env := os.Getenv("env")
 	if err != nil && env == "" {
 		log.Fatalf("Failed to load env, err : %v", err)
@@ -33,10 +33,10 @@ func main() {
 
 	middleware := middleware.Init(service)
 
-	rest := rest.NewRest(handler,middleware)
+	rest := rest.NewRest(handler, middleware)
 
 	config.Migrate(db)
 
-	rest.UserRoute()
+	rest.RestRoute()
 
 }
