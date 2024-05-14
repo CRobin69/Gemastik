@@ -8,12 +8,12 @@ import (
 )
 
 type IUserRepository interface {
-	Create(user entity.User) (error)
+	Create(user entity.User) error
 	FindByID(id uuid.UUID) (entity.User, error)
 	FindByEmail(email string) (entity.User, error)
-	Update(user entity.User) (entity.User, error)
-	UpdatePassword(user entity.User) (entity.User, error)
-	UpdatePhoto(user entity.User) (entity.User, error)
+	UpdateProfile(user entity.User) error
+	UpdatePassword(user entity.User) error
+	UpdatePhoto(user entity.User) error
 	Delete(id uuid.UUID) error
 	FindByParam(param model.UserParam) (entity.User, error)
 }
@@ -26,9 +26,17 @@ func NewUserRepository(db *gorm.DB) IUserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) Create(user entity.User) (error) {
-	if err := r.db.Create(&user).Error; err != nil {
-		return  err
+func (r *UserRepository) Create(user entity.User) error {
+	if err := r.db.Create(map[string]interface{}{
+		"phone_number": user.PhoneNumber,
+		"name":         user.Name,
+		"email":        user.Email,
+		"password":     user.Password,
+		"photo_link":   user.PhotoLink,
+		"updated_at":   user.CreatedAt,
+		"created_at":   user.CreatedAt,
+	}).Error; err != nil {
+		return err
 	}
 
 	return nil
@@ -54,28 +62,39 @@ func (r *UserRepository) FindByEmail(email string) (entity.User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) Update(user entity.User) (entity.User, error) {
-	if err := r.db.Where("id", user.ID).Updates(&user).Error; err != nil {
-		return user, err
+func (r *UserRepository) UpdateProfile(user entity.User) error {
+	if err := r.db.Model(&user).Where("id", user.ID).Updates(map[string]interface{}{
+		"name":         user.Name,
+		"phone_number": user.PhoneNumber,
+		"updated_at":   user.UpdatedAt,
+	}).Error; err != nil {
+		return err
 	}
 
-	return user, nil
+	return nil
 }
 
-func (r *UserRepository) UpdatePassword(user entity.User) (entity.User, error) {
-	if err := r.db.Model(&user).Update("password", user.Password).Error; err != nil {
-		return user, err
+func (r *UserRepository) UpdatePassword(user entity.User) error {
+	if err := r.db.Model(&user).Updates(map[string]interface{}{
+		"password":   user.Password,
+		"updated_at": user.UpdatedAt,
+	}).Error; err != nil {
+		return err
 	}
 
-	return user, nil
+	return nil
 }
 
-func (r *UserRepository) UpdatePhoto(user entity.User) (entity.User, error) {
-	if err := r.db.Model(&user).Where("id", user.ID).Update("photo_link", user.PhotoLink).Error; err != nil {
-		return user, err
+func (r *UserRepository) UpdatePhoto(user entity.User) error {
+	if err := r.db.Model(&user).Where("id = ?", user.ID).
+		Updates(map[string]interface{}{
+			"photo_link": user.PhotoLink,
+			"updated_at": user.UpdatedAt,
+		}).Error; err != nil {
+		return err
 	}
 
-	return user, nil
+	return nil
 }
 
 func (r *UserRepository) Delete(id uuid.UUID) error {
