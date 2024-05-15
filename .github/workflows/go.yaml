@@ -22,7 +22,7 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "ENV=${{ secrets.ENV}}" > .env
+          echo "ENV=${{ secrets.ENV }}" > .env
         shell: bash
 
       - name: Build and push the Docker image
@@ -36,4 +36,4 @@ jobs:
           docker build . -t asia-southeast2-docker.pkg.dev/${{ secrets.GOOGLE_PROJECT }}/ankor/gemastik:latest
           
           echo "Pushing the Docker image"
-          docker push asia-southeast2-docker.pkg.dev/${{ secrets.GOOGLE_PROJECT }ankor/gemastik:latest
+          docker push asia-southeast2-docker.pkg.dev/${{ secrets.GOOGLE_PROJECT }}ankor/gemastik:latest
