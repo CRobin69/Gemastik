@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/CRobinDev/Gemastik/internal/repository"
 	"github.com/CRobinDev/Gemastik/model"
 	"github.com/CRobinDev/Gemastik/pkg/errors"
+	"github.com/CRobinDev/Gemastik/pkg/gocron"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -45,7 +47,17 @@ func (cs *ChatService) GenerateResponse(req model.ChatRequest) (model.ServiceRes
 }
 
 func (cs *ChatService) GenerateTextResponse(req model.ChatRequest) (model.ServiceResponse, error) {
+	chatHistory, err := cs.ChatRepository.GetHistory(req.UserID)
+	if err != nil {
+		return model.ServiceResponse{
+			Code:    http.StatusInternalServerError,
+			Error:   true,
+			Message: errors.ErrInternalServer.Error(),
+			Data:    nil,
+		}, err
+	}
 
+	// Construct the chat completion request
 	request := openai.ChatCompletionRequest{
 		Model: openai.GPT4Turbo,
 		Messages: []openai.ChatCompletionMessage{
@@ -53,13 +65,23 @@ func (cs *ChatService) GenerateTextResponse(req model.ChatRequest) (model.Servic
 				Role:    openai.ChatMessageRoleSystem,
 				Content: "respond as an expert from Indonesia Corruption Watch (ICW)!",
 			},
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: req.Chat,
-			},
 		},
 		MaxTokens: 512,
 	}
+
+	// Append previous chat history to the request messages
+	for _, chat := range chatHistory {
+		request.Messages = append(request.Messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleAssistant,
+			Content: chat,
+		})
+	}
+	log.Println("chat history", chatHistory)
+
+	request.Messages = append(request.Messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: req.Chat,
+	})
 
 	resp, err := cs.client.CreateChatCompletion(context.Background(), request)
 	if err != nil {
@@ -80,7 +102,7 @@ func (cs *ChatService) GenerateTextResponse(req model.ChatRequest) (model.Servic
 		Output:    resp.Choices[0].Message.Content,
 		CreatedAt: createdAt,
 	}
-
+	
 	if err := cs.ChatRepository.InsertChat(chat); err != nil {
 		return model.ServiceResponse{
 			Code:    http.StatusInternalServerError,
@@ -90,6 +112,8 @@ func (cs *ChatService) GenerateTextResponse(req model.ChatRequest) (model.Servic
 		}, err
 	}
 
+	gocron.StartChatCleanupScheduler(cs.ChatRepository)
+	
 	return model.ServiceResponse{
 		Code:    http.StatusOK,
 		Error:   false,
@@ -120,4 +144,3 @@ func (cs *ChatService) GenerateImageResponse(req model.ChatRequest) (model.Servi
 		Data:    imageURL,
 	}, nil
 }
-
