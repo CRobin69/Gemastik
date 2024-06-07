@@ -27,7 +27,8 @@ func NewUserRepository(db *gorm.DB) IUserRepository {
 }
 
 func (r *UserRepository) Create(user entity.User) error {
-	if err := r.db.Create(map[string]interface{}{
+	if err := r.db.Model(&user).Create(map[string]interface{}{
+		"id":           user.ID,
 		"phone_number": user.PhoneNumber,
 		"name":         user.Name,
 		"email":        user.Email,
