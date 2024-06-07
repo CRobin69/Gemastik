@@ -26,6 +26,7 @@ func NewRest(handler *handler.Handler, middleware middleware.IMiddleware) *Rest 
 }
 
 func (r *Rest) RestRoute() {
+	r.router.Use(middleware.CORSMiddleware())
 	r.router.NoRoute(func(ctx *gin.Context) {
 		response.Error(ctx, model.ServiceResponse{
 			Code:    http.StatusNotFound,
@@ -33,7 +34,6 @@ func (r *Rest) RestRoute() {
 			Message: errors.ErrRouteNotFound.Error(),
 		})
 	})
-	r.router.Use(middleware.CORSMiddleware())
 	v1 := r.router.Group("/api/v1")
 	r.LeaderboardRoute(v1)
 	r.UserRoute(v1)
