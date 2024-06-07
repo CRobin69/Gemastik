@@ -53,11 +53,10 @@ func (cs *ChatService) GenerateTextResponse(req model.ChatRequest) (model.Servic
 			Code:    http.StatusInternalServerError,
 			Error:   true,
 			Message: errors.ErrInternalServer.Error(),
-			Data:    nil,
+			Data:    err,
 		}, err
 	}
 
-	// Construct the chat completion request
 	request := openai.ChatCompletionRequest{
 		Model: openai.GPT4Turbo,
 		Messages: []openai.ChatCompletionMessage{
@@ -69,7 +68,6 @@ func (cs *ChatService) GenerateTextResponse(req model.ChatRequest) (model.Servic
 		MaxTokens: 512,
 	}
 
-	// Append previous chat history to the request messages
 	for _, chat := range chatHistory {
 		request.Messages = append(request.Messages, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleAssistant,
@@ -89,7 +87,7 @@ func (cs *ChatService) GenerateTextResponse(req model.ChatRequest) (model.Servic
 			Code:    http.StatusInternalServerError,
 			Error:   true,
 			Message: errors.ErrInternalServer.Error(),
-			Data:    nil,
+			Data:    err,
 		}, err
 	}
 
@@ -108,7 +106,7 @@ func (cs *ChatService) GenerateTextResponse(req model.ChatRequest) (model.Servic
 			Code:    http.StatusInternalServerError,
 			Error:   true,
 			Message: errors.ErrInternalServer.Error(),
-			Data:    nil,
+			Data:    err,
 		}, err
 	}
 
