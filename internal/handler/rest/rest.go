@@ -27,6 +27,9 @@ func NewRest(handler *handler.Handler, middleware middleware.IMiddleware) *Rest 
 
 func (r *Rest) RestRoute() {
 	r.router.Use(middleware.CORSMiddleware())
+	r.router.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{"message": "hi, i'm Ankor server"})
+	})
 	r.router.NoRoute(func(ctx *gin.Context) {
 		response.Error(ctx, model.ServiceResponse{
 			Code:    http.StatusNotFound,
@@ -38,7 +41,6 @@ func (r *Rest) RestRoute() {
 	r.LeaderboardRoute(v1)
 	r.UserRoute(v1)
 	r.EducationRoute(v1)
-
 	r.router.Run()
 }
 func (r *Rest) EducationRoute(router *gin.RouterGroup) {

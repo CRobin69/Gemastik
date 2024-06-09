@@ -30,7 +30,7 @@ func (r *LeaderboardRepository) CreateLeaderboard(leaderboard entity.Leaderboard
 func (r *LeaderboardRepository) GetLeaderboard() ([]model.CreateLeaderboardResponse, error) {
 	var leaderboards []entity.Leaderboard
 
-	if err := r.db.Find(&leaderboards).Error; err != nil {
+	if err := r.db.Order("id ASC").Find(&leaderboards).Error; err != nil {
 		return nil, err
 	}
 
