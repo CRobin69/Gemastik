@@ -39,7 +39,7 @@ func (us *UserService) Register(req model.UserRegisterRequest) (model.ServiceRes
 		return model.ServiceResponse{
 			Code:    http.StatusBadRequest,
 			Error:   true,
-			Message: err.Error(),
+			Message: errors.ErrInvalidPassword.Error(),
 			Data:    nil,
 		}, err
 	}
@@ -168,7 +168,7 @@ func ValidateRequestRegister(req model.UserRegisterRequest) error {
 		return errors.ErrInvalidPassword
 	case req.Name == "":
 		return errors.ErrUsernameRequired
-	case req.PhoneNumber == "" || !validator.ValidatePhone(req.PhoneNumber):
+	case !validator.ValidatePhone(req.PhoneNumber):
 		return errors.ErrInvalidPhoneNumber
 	}
 	return nil

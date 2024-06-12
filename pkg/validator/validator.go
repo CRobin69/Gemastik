@@ -32,7 +32,7 @@ func ValidatePassword(password string) bool {
 }
 
 func ValidatePhone(phoneNumber string) bool {
-	if len(phoneNumber) > 13 || len(phoneNumber) < 12 || phoneNumber[:1] != "0" {
+	if len(phoneNumber) > 13 || len(phoneNumber) < 12 || (phoneNumber[:1] != "0" && phoneNumber[:1] != "62") {
 		return false
 	}
 
